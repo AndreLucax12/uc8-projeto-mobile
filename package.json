@@ -1,12 +1,14 @@
 {
   "name": "uc8-projeto-mobile",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "main": "index.ts",
   "dependencies": {
     "expo": "~57.0.21",
     "expo-status-bar": "~57.0.1",
     "react": "19.2.3",
-    "react-native": "0.86.3"
+    "react-dom": "19.2.3",
+    "react-native": "0.86.3",
+    "react-native-web": "^0.21.2"
   },
   "devDependencies": {
     "@types/react": "~19.2.2",
