@@ -1,24 +1,43 @@
-import { StatusBar } from "expo-status-bar";
-import { ScrollView, StyleSheet, Text, View } from "react-native";
-import { CartaoOrdemServico } from "./src/componentes/CartaoOrdemServico";
-import type { OrdemServico } from "./src/types/entidades";
-
-const ordens: OrdemServico[] = [
-  { id: 1, equipamentoId: 10, descricaoDefeito: 'Tela quebrada', status: 'aberta', valorTotal: 350, dataAbertura: '2026-09-20' },
-  { id: 2, equipamentoId: 11, descricaoDefeito: 'Não liga', status: 'em andamento', valorTotal: 180, dataAbertura: '2026-09-22' },
-  { id: 3, equipamentoId: 12, descricaoDefeito: 'Bateria estufada', status: 'finalizada', valorTotal: 220, dataAbertura: '2026-09-25' },
-];
-
+import { StatusBar } from 'expo-status-bar';
+import { useEffect, useState } from 'react';
+import { FlatList, StyleSheet, Text, View } from 'react-native';
+import { CartaoOrdemServico } from './src/componentes/CartaoOrdemServico';
+import { FormularioOrdemServico, type DadosOrdemServico } from './src/componentes/FormularioOrdemServico';
+import { buscarOrdens } from './src/servicos/ordensServico';
+import type { OrdemServico } from './src/types/entidades';
 
 export default function App() {
+  const [ordens, setOrdens] = useState<OrdemServico[]>([]);
+  const [carregando, setCarregando] = useState(true);
+
+  useEffect(() => {
+    buscarOrdens().then((dados) => {
+      setOrdens(dados);
+      setCarregando(false);
+    });
+  }, []);
+
+  function adicionar(dados: DadosOrdemServico) {
+    const proximoId = ordens.reduce((maior, atual) => Math.max(maior, atual.id), 0) + 1;
+    setOrdens([{ id: proximoId, ...dados }, ...ordens]);
+  }
+
   return (
     <View style={estilos.tela}>
       <Text style={estilos.cabecalho}>Ordens de serviço</Text>
-      <ScrollView>
-        {ordens.map((ordem) => (
-          <CartaoOrdemServico key={ordem.id} ordem={ordem} />
-        ))}
-      </ScrollView>
+      {carregando ? (
+        <Text style={estilos.aviso}>Carregando ordens...</Text>
+      ) : (
+        <>
+          <FormularioOrdemServico aoAdicionar={adicionar} />
+          <FlatList
+            data={ordens}
+            keyExtractor={(ordem) => String(ordem.id)}
+            renderItem={({ item }) => <CartaoOrdemServico ordem={item} />}
+            ListEmptyComponent={<Text>Nenhuma ordem de serviço.</Text>}
+          />
+        </>
+      )}
       <StatusBar style="auto" />
     </View>
   );
@@ -27,4 +46,5 @@ export default function App() {
 const estilos = StyleSheet.create({
   tela: { flex: 1, backgroundColor: '#F6F8FA', paddingTop: 48, paddingHorizontal: 16 },
   cabecalho: { fontSize: 24, fontWeight: 'bold', marginBottom: 16 },
+  aviso: { color: '#5B6B7C', fontSize: 16 },
 });
