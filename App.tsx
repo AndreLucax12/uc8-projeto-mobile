@@ -1,19 +1,19 @@
 import { StatusBar } from 'expo-status-bar';
 import { NavigationContainer } from '@react-navigation/native';
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import type { RotasDaPilha } from './src/navegacao/tipos';
-import { TelaDetalheOrdem } from './src/telas/TelaDetalheOrdem';
-import { TelaOrdens } from './src/telas/TelaOrdens';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { PilhaOrdens } from './src/navegacao/PilhaOrdens';
+import type { RotasDasAbas } from './src/navegacao/tipos';
+import { TelaClientes } from './src/telas/TelaClientes';
 
-const Pilha = createNativeStackNavigator<RotasDaPilha>();
+const Abas = createBottomTabNavigator<RotasDasAbas>();
 
 export default function App() {
   return (
     <NavigationContainer>
-      <Pilha.Navigator>
-        <Pilha.Screen name="Ordens" component={TelaOrdens} options={{ title: 'Ordens de serviço' }} />
-        <Pilha.Screen name="DetalheOrdem" component={TelaDetalheOrdem} options={{ title: 'Detalhe da OS' }} />
-      </Pilha.Navigator>
+      <Abas.Navigator>
+        <Abas.Screen name="AbaOrdens" component={PilhaOrdens} options={{ title: 'Ordens', headerShown: false }} />
+        <Abas.Screen name="AbaClientes" component={TelaClientes} options={{ title: 'Clientes' }} />
+      </Abas.Navigator>
       <StatusBar style="auto" />
     </NavigationContainer>
   );
