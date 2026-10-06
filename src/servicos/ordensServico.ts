@@ -1,6 +1,6 @@
 import type { OrdemServico } from '../types/entidades';
 
-const ordens: OrdemServico[] = [
+let ordens: OrdemServico[] = [
   { id: 1, equipamentoId: 10, descricaoDefeito: 'Tela quebrada', status: 'aberta', valorTotal: 350, dataAbertura: '2026-09-20' },
   { id: 2, equipamentoId: 11, descricaoDefeito: 'Não liga', status: 'em andamento', valorTotal: 180, dataAbertura: '2026-09-22' },
   { id: 3, equipamentoId: 12, descricaoDefeito: 'Bateria estufada', status: 'finalizada', valorTotal: 220, dataAbertura: '2026-09-25' },
@@ -10,5 +10,16 @@ const ordens: OrdemServico[] = [
 export function buscarOrdens(): Promise<OrdemServico[]> {
   return new Promise((resolve) => {
     setTimeout(() => resolve(ordens), 1500);
+  });
+}
+
+// Guarda a OS nova no serviço, para que outras telas (como o detalhe) a encontrem.
+export function guardarOrdem(ordem: OrdemServico): void {
+  ordens = [ordem, ...ordens];
+}
+
+export function buscarOrdem(id: number): Promise<OrdemServico | undefined> {
+  return new Promise((resolve) => {
+    setTimeout(() => resolve(ordens.find((ordem) => ordem.id === id)), 400);
   });
 }
