@@ -23,3 +23,7 @@ export function buscarOrdem(id: number): Promise<OrdemServico | undefined> {
     setTimeout(() => resolve(ordens.find((ordem) => ordem.id === id)), 400);
   });
 }
+
+export function proximoIdOrdem(): number {
+  return ordens.reduce((maior, atual) => Math.max(maior, atual.id), 0) + 1;
+}
