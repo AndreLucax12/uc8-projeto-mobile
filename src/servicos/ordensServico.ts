@@ -1,29 +1,83 @@
-import type { OrdemServico } from '../types/entidades';
+import type { OrdemServico, OrdemServicoDetalhada } from '../types/entidades';
+import { campos, requisitar } from './api';
 
-let ordens: OrdemServico[] = [
-  { id: 1, equipamentoId: 10, descricaoDefeito: 'Tela quebrada', status: 'aberta', valorTotal: 350, dataAbertura: '2026-09-20' },
-  { id: 2, equipamentoId: 11, descricaoDefeito: 'Não liga', status: 'em andamento', valorTotal: 180, dataAbertura: '2026-09-22' },
-  { id: 3, equipamentoId: 12, descricaoDefeito: 'Bateria estufada', status: 'finalizada', valorTotal: 220, dataAbertura: '2026-09-25' },
-];
-
-// Simula uma busca num servidor: um dia esta função buscará dados de verdade.
-export function buscarOrdens(): Promise<OrdemServico[]> {
-  return new Promise((resolve) => {
-    setTimeout(() => resolve(ordens), 1500);
-  });
+// O que o aplicativo envia para abrir uma OS: o status, o id e a data são definidos pelo banco.
+export interface DadosNovaOrdem {
+  id_equipamento: number;
+  descricao_defeito: string;
+  valor_total: number;
 }
 
-// Guarda a OS nova no serviço, para que outras telas (como o detalhe) a encontrem.
-export function guardarOrdem(ordem: OrdemServico): void {
-  ordens = [ordem, ...ordens];
+interface OrdemRemota {
+  id: number;
+  id_equipamento: number;
+  descricao_defeito: string;
+  status: OrdemServico['status'];
+  valor_total: number;
+  data_abertura: string;
+  equipamentos: { marca: string; modelo: string; id_cliente: number; clientes: { nome: string } };
 }
 
-export function buscarOrdem(id: number): Promise<OrdemServico | undefined> {
-  return new Promise((resolve) => {
-    setTimeout(() => resolve(ordens.find((ordem) => ordem.id === id)), 400);
-  });
+// O select traz a OS com o equipamento e o cliente numa consulta só (o JOIN do TechOS Desktop).
+const COLUNAS =
+  'id,id_equipamento,descricao_defeito,status,valor_total,data_abertura,equipamentos(marca,modelo,id_cliente,clientes(nome))';
+
+function ehStatus(valor: unknown): valor is OrdemServico['status'] {
+  return valor === 'aberta' || valor === 'em andamento' || valor === 'finalizada';
 }
 
-export function proximoIdOrdem(): number {
-  return ordens.reduce((maior, atual) => Math.max(maior, atual.id), 0) + 1;
+function ehOrdemRemota(valor: unknown): valor is OrdemRemota {
+  const ordem = campos(valor);
+  const equipamento = campos(ordem?.equipamentos);
+  const cliente = campos(equipamento?.clientes);
+  return (
+    ordem !== undefined &&
+    typeof ordem.id === 'number' &&
+    typeof ordem.id_equipamento === 'number' &&
+    typeof ordem.descricao_defeito === 'string' &&
+    ehStatus(ordem.status) &&
+    typeof ordem.valor_total === 'number' &&
+    typeof ordem.data_abertura === 'string' &&
+    equipamento !== undefined &&
+    typeof equipamento.marca === 'string' &&
+    typeof equipamento.modelo === 'string' &&
+    typeof equipamento.id_cliente === 'number' &&
+    cliente !== undefined &&
+    typeof cliente.nome === 'string'
+  );
+}
+
+function ehListaDeOrdens(valor: unknown): valor is OrdemRemota[] {
+  return Array.isArray(valor) && valor.every(ehOrdemRemota);
+}
+
+function paraOrdem(remota: OrdemRemota): OrdemServicoDetalhada {
+  return {
+    id: remota.id,
+    equipamentoId: remota.id_equipamento,
+    descricaoDefeito: remota.descricao_defeito,
+    status: remota.status,
+    valorTotal: remota.valor_total,
+    dataAbertura: remota.data_abertura,
+    marca: remota.equipamentos.marca,
+    modelo: remota.equipamentos.modelo,
+    clienteId: remota.equipamentos.id_cliente,
+    nomeCliente: remota.equipamentos.clientes.nome,
+  };
+}
+
+export async function carregarOrdens(): Promise<OrdemServicoDetalhada[]> {
+  const corpo = await requisitar(`ordens_servico?select=${COLUNAS}&order=id.desc`);
+  if (!ehListaDeOrdens(corpo)) {
+    throw new Error('Resposta inesperada da API');
+  }
+  return corpo.map(paraOrdem);
+}
+
+export async function incluirOrdem(dados: DadosNovaOrdem): Promise<OrdemServicoDetalhada> {
+  const corpo = await requisitar(`ordens_servico?select=${COLUNAS}`, 'POST', dados);
+  if (!ehListaDeOrdens(corpo) || corpo.length !== 1) {
+    throw new Error('Resposta inesperada da API');
+  }
+  return paraOrdem(corpo[0]);
 }

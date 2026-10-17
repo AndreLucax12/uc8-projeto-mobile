@@ -11,8 +11,23 @@ export function formatarMoeda(valor: number): string {
   return `R$ ${valor.toFixed(2).replace('.', ',')}`;
 }
 
-// '2026-09-20' ou '2026-09-20T01:22:24Z' -> 20/09/2026.
+function doisDigitos(numero: number): string {
+  return String(numero).padStart(2, '0');
+}
+
+// '2026-08-26T01:22:24+00:00' -> 25/08/2026: a data no fuso do aparelho, como o TechOS Desktop mostra.
 export function formatarData(data: string): string {
-  const [ano, mes, dia] = data.slice(0, 10).split('-');
-  return `${dia}/${mes}/${ano}`;
+  const momento = new Date(data);
+  if (Number.isNaN(momento.getTime())) {
+    return data;
+  }
+  return `${doisDigitos(momento.getDate())}/${doisDigitos(momento.getMonth() + 1)}/${momento.getFullYear()}`;
+}
+
+// Para a busca: sem acento e sem diferença de maiúscula ("André" encontra "andre").
+export function normalizarTexto(texto: string): string {
+  return texto
+    .normalize('NFD')
+    .replace(/[̀-ͯ]/g, '')
+    .toLowerCase();
 }

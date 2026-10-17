@@ -19,3 +19,11 @@ export interface OrdemServico {
   valorTotal: number;
   dataAbertura: string;
 }
+
+// A OS como a lista mostra: com o equipamento e o cliente, como o JOIN do TechOS Desktop.
+export interface OrdemServicoDetalhada extends OrdemServico {
+  marca: string;
+  modelo: string;
+  clienteId: number;
+  nomeCliente: string;
+}

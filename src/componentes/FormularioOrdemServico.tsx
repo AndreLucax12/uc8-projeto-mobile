@@ -2,14 +2,11 @@ import { useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { Botao } from './Botao';
 import { Campo } from './Campo';
+import type { DadosNovaOS } from '../contexto/OrdensContexto';
 import { espacos } from '../tema/tema';
-import type { OrdemServico } from '../types/entidades';
-
-// Os campos da OS sem o id: quem guarda a lista define o id.
-export type DadosOrdemServico = Omit<OrdemServico, 'id'>;
 
 interface FormularioOrdemServicoProps {
-  aoAdicionar: (dados: DadosOrdemServico) => void;
+  aoAdicionar: (dados: DadosNovaOS) => void;
 }
 
 export function FormularioOrdemServico({ aoAdicionar }: FormularioOrdemServicoProps) {
@@ -39,12 +36,11 @@ export function FormularioOrdemServico({ aoAdicionar }: FormularioOrdemServicoPr
   }
 
   function enviar() {
+    // A OS nasce "aberta", com a data de hoje: quem define é o banco.
     aoAdicionar({
       descricaoDefeito: descricao.trim(),
       equipamentoId: numeroEquipamento,
       valorTotal: valorNumero,
-      status: 'aberta',
-      dataAbertura: new Date().toISOString().slice(0, 10),
     });
     setDescricao('');
     setEquipamentoId('');

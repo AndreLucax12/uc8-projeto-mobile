@@ -1,6 +1,7 @@
 import { StatusBar } from 'expo-status-bar';
 import { DarkTheme, NavigationContainer, type Theme } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { OrdensProvedor } from './src/contexto/OrdensContexto';
 import { PilhaOrdens } from './src/navegacao/PilhaOrdens';
 import type { RotasDasAbas } from './src/navegacao/tipos';
 import { TelaBusca } from './src/telas/TelaBusca';
@@ -25,14 +26,16 @@ const temaDaNavegacao: Theme = {
 
 export default function App() {
   return (
-    <NavigationContainer theme={temaDaNavegacao}>
-      <Abas.Navigator>
-        <Abas.Screen name="AbaOrdens" component={PilhaOrdens} options={{ title: 'Ordens', headerShown: false }} />
-        <Abas.Screen name="AbaClientes" component={TelaClientes} options={{ title: 'Clientes' }} />
-        <Abas.Screen name="AbaBusca" component={TelaBusca} options={{ title: 'Busca' }} />
-        <Abas.Screen name="AbaSobre" component={TelaSobre} options={{ title: 'Sobre' }} />
-      </Abas.Navigator>
-      <StatusBar style="light" />
-    </NavigationContainer>
+    <OrdensProvedor>
+      <NavigationContainer theme={temaDaNavegacao}>
+        <Abas.Navigator>
+          <Abas.Screen name="AbaOrdens" component={PilhaOrdens} options={{ title: 'Ordens', headerShown: false }} />
+          <Abas.Screen name="AbaClientes" component={TelaClientes} options={{ title: 'Clientes' }} />
+          <Abas.Screen name="AbaBusca" component={TelaBusca} options={{ title: 'Busca' }} />
+          <Abas.Screen name="AbaSobre" component={TelaSobre} options={{ title: 'Sobre' }} />
+        </Abas.Navigator>
+        <StatusBar style="light" />
+      </NavigationContainer>
+    </OrdensProvedor>
   );
 }

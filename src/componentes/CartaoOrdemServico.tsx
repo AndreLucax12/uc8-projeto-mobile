@@ -1,10 +1,10 @@
 import { StyleSheet, Text, View } from 'react-native';
 import { cores, espacos, raio } from '../tema/tema';
-import type { OrdemServico } from '../types/entidades';
+import type { OrdemServicoDetalhada } from '../types/entidades';
 import { formatarData, formatarMoeda } from '../utils/formatar';
 
 interface CartaoOrdemServicoProps {
-  ordem: OrdemServico;
+  ordem: OrdemServicoDetalhada;
 }
 
 export function CartaoOrdemServico({ ordem }: CartaoOrdemServicoProps) {
@@ -12,7 +12,9 @@ export function CartaoOrdemServico({ ordem }: CartaoOrdemServicoProps) {
     <View style={estilos.cartao}>
       <View style={estilos.linha}>
         <View style={estilos.coluna}>
-          <Text style={estilos.numero}>OS #{ordem.id}</Text>
+          <Text style={estilos.titulo}>
+            {ordem.nomeCliente} — {ordem.marca} {ordem.modelo}
+          </Text>
           <Text style={estilos.defeito}>{ordem.descricaoDefeito}</Text>
         </View>
         <View
@@ -27,10 +29,11 @@ export function CartaoOrdemServico({ ordem }: CartaoOrdemServicoProps) {
         </View>
       </View>
       <View style={estilos.linha}>
-        <Text style={[estilos.info, estilos.coluna]}>Equipamento #{ordem.equipamentoId}</Text>
+        <Text style={[estilos.info, estilos.coluna]}>
+          OS #{ordem.id} · {formatarData(ordem.dataAbertura)}
+        </Text>
         <Text style={estilos.valor}>{formatarMoeda(ordem.valorTotal)}</Text>
       </View>
-      <Text style={estilos.data}>Aberta em {formatarData(ordem.dataAbertura)}</Text>
     </View>
   );
 }
@@ -47,14 +50,13 @@ const estilos = StyleSheet.create({
   },
   linha: { flexDirection: 'row', alignItems: 'flex-start', gap: espacos.sm },
   coluna: { flex: 1 },
-  numero: { fontSize: 18, fontWeight: 'bold', color: cores.texto },
+  titulo: { fontSize: 16, fontWeight: 'bold', color: cores.texto },
   defeito: { color: cores.textoSecundario },
   etiqueta: { borderRadius: raio, paddingHorizontal: espacos.sm, paddingVertical: espacos.xs },
   aberta: { backgroundColor: cores.statusAberta },
   emAndamento: { backgroundColor: cores.statusEmAndamento },
   finalizada: { backgroundColor: cores.statusFinalizada },
   textoEtiqueta: { color: cores.fundo, fontWeight: 'bold', fontSize: 12 },
-  info: { color: cores.texto },
+  info: { color: cores.textoSecundario, fontSize: 12 },
   valor: { color: cores.texto, fontWeight: 'bold' },
-  data: { color: cores.textoSecundario, fontSize: 12 },
 });
