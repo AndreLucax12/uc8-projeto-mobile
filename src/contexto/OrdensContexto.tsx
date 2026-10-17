@@ -1,14 +1,21 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
-import { guardarLocal } from '../banco/banco';
+import { guardarLocal, listarLocal } from '../banco/banco';
 import { descreverErro } from '../servicos/api';
 import { carregarClientes, carregarEquipamentos } from '../servicos/clientesServico';
 import { carregarOrdens, incluirOrdem } from '../servicos/ordensServico';
 import type { Cliente, Equipamento, OrdemServicoDetalhada } from '../types/entidades';
 
+interface Dados {
+  ordens: OrdemServicoDetalhada[];
+  clientes: Cliente[];
+  equipamentos: Equipamento[];
+}
+
 export type EstadoOrdens =
   | { tipo: 'carregando' }
   | { tipo: 'erro'; mensagem: string }
-  | { tipo: 'pronto'; ordens: OrdemServicoDetalhada[]; clientes: Cliente[]; equipamentos: Equipamento[] };
+  | ({ tipo: 'pronto'; origem: 'nuvem' } & Dados)
+  | ({ tipo: 'pronto'; origem: 'aparelho'; motivo: string } & Dados);
 
 // O que a tela Nova OS entrega: o banco define o id, o status e a data.
 export interface DadosNovaOS {
@@ -36,7 +43,7 @@ export function OrdensProvedor({ children }: { children: ReactNode }) {
     Promise.all([carregarOrdens(), carregarClientes(), carregarEquipamentos()])
       .then(([ordens, clientes, equipamentos]) => {
         if (!cancelado) {
-          setEstado({ tipo: 'pronto', ordens, clientes, equipamentos });
+          setEstado({ tipo: 'pronto', origem: 'nuvem', ordens, clientes, equipamentos });
         }
         // Guarda no aparelho o que veio da nuvem; uma falha aqui não atrapalha a lista.
         guardarLocal({ ordens, clientes, equipamentos }).catch((erro: unknown) => {
@@ -44,9 +51,24 @@ export function OrdensProvedor({ children }: { children: ReactNode }) {
         });
       })
       .catch((erro: unknown) => {
-        if (!cancelado) {
-          setEstado({ tipo: 'erro', mensagem: descreverErro(erro) });
-        }
+        // Sem a nuvem, a lista vem do que o aparelho guardou na última carga com rede.
+        const motivo = descreverErro(erro);
+        listarLocal()
+          .then((guardados) => {
+            if (cancelado) {
+              return;
+            }
+            if (guardados.ordens.length > 0) {
+              setEstado({ tipo: 'pronto', origem: 'aparelho', motivo, ...guardados });
+            } else {
+              setEstado({ tipo: 'erro', mensagem: motivo });
+            }
+          })
+          .catch((erroLocal: unknown) => {
+            if (!cancelado) {
+              setEstado({ tipo: 'erro', mensagem: motivo + ' / ' + descreverErro(erroLocal) });
+            }
+          });
       });
     return () => {
       cancelado = true;

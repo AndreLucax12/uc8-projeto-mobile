@@ -35,6 +35,11 @@ export function TelaOrdens({ navigation }: TelaOrdensProps) {
       case 'pronto':
         return (
           <>
+            {estado.origem === 'aparelho' && (
+              <Text style={estilos.alerta}>
+                Sem conexão: mostrando as ordens guardadas no aparelho ({estado.motivo})
+              </Text>
+            )}
             <Text style={estilos.contador}>
               {estado.ordens.length} {estado.ordens.length === 1 ? 'ordem' : 'ordens'} de serviço
             </Text>
@@ -78,6 +83,7 @@ const estilos = StyleSheet.create({
   erro: { color: cores.erro, fontWeight: 'bold' },
   detalheDoErro: { color: cores.textoSecundario, textAlign: 'center' },
   contador: { color: cores.textoSecundario, marginBottom: espacos.sm },
+  alerta: { color: cores.alerta, marginBottom: espacos.sm },
   linhaDeColunas: { gap: espacos.sm },
   celula: { flex: 1 },
   detalhes: { color: cores.primaria, fontWeight: 'bold', marginBottom: espacos.md },
