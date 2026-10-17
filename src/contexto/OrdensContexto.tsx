@@ -7,7 +7,8 @@ import {
   removerPendente,
   type Pendente,
 } from '../banco/banco';
-import { ErroDaApi, descreverErro } from '../servicos/api';
+import { registrarErro } from '../erros/erros';
+import { ErroDaApi } from '../servicos/api';
 import { carregarClientes, carregarEquipamentos } from '../servicos/clientesServico';
 import { carregarOrdens, incluirOrdem, type DadosNovaOrdem } from '../servicos/ordensServico';
 import type { Cliente, Equipamento, OrdemServicoDetalhada } from '../types/entidades';
@@ -57,21 +58,27 @@ export function OrdensProvedor({ children }: { children: ReactNode }) {
     let cancelado = false;
     setEstado({ tipo: 'carregando' });
     // Primeiro envia o que ficou na fila; depois lê a nuvem, que já traz as OS enviadas.
+    // Cada etapa que pode falhar tem o próprio catch: o banco falhar não impede a lista da nuvem.
     sincronizar()
+      .catch((erro: unknown) => {
+        registrarErro('sincronizar', erro);
+      })
       .then(() => Promise.all([carregarOrdens(), carregarClientes(), carregarEquipamentos()]))
       .then(async ([ordens, clientes, equipamentos]) => {
-        const pendentes = await listarPendentes();
+        const pendentes = await listarPendentes().catch((erro: unknown) => {
+          registrarErro('pendentes', erro);
+          return [];
+        });
         if (!cancelado) {
           setEstado({ tipo: 'pronto', origem: 'nuvem', ordens, clientes, equipamentos, pendentes });
         }
-        // Guarda no aparelho o que veio da nuvem; uma falha aqui não atrapalha a lista.
         guardarLocal({ ordens, clientes, equipamentos }).catch((erro: unknown) => {
-          console.warn('Não foi possível guardar no aparelho: ' + descreverErro(erro));
+          registrarErro('guardar no aparelho', erro);
         });
       })
       .catch((erro: unknown) => {
         // Sem a nuvem, a lista vem do que o aparelho guardou na última carga com rede.
-        const motivo = descreverErro(erro);
+        const motivo = registrarErro('carga', erro).mensagem;
         Promise.all([listarLocal(), listarPendentes()])
           .then(([guardados, pendentes]) => {
             if (cancelado) {
@@ -85,7 +92,7 @@ export function OrdensProvedor({ children }: { children: ReactNode }) {
           })
           .catch((erroLocal: unknown) => {
             if (!cancelado) {
-              setEstado({ tipo: 'erro', mensagem: motivo + ' / ' + descreverErro(erroLocal) });
+              setEstado({ tipo: 'erro', mensagem: registrarErro('leitura do aparelho', erroLocal).mensagem });
             }
           });
       });
@@ -106,7 +113,7 @@ export function OrdensProvedor({ children }: { children: ReactNode }) {
         await incluirOrdem(paraEnvio(pendente));
       } catch (erro: unknown) {
         if (erro instanceof ErroDaApi) {
-          console.warn('Pendente descartado pela API: ' + descreverErro(erro));
+          registrarErro('pendente descartado', erro);
         } else {
           return;
         }

@@ -37,7 +37,7 @@ export function TelaOrdens({ navigation }: TelaOrdensProps) {
           <>
             {estado.origem === 'aparelho' && (
               <Text style={estilos.alerta}>
-                Sem conexão: mostrando as ordens guardadas no aparelho ({estado.motivo})
+                Mostrando as ordens guardadas no aparelho: {estado.motivo}
               </Text>
             )}
             {estado.pendentes.length > 0 && (
