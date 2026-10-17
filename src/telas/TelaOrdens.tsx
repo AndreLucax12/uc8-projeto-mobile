@@ -2,10 +2,11 @@ import { useCallback, useState } from 'react';
 import { ActivityIndicator, FlatList, Pressable, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { Botao } from '../componentes/Botao';
 import { CartaoOrdemServico } from '../componentes/CartaoOrdemServico';
 import type { RotasDaPilha } from '../navegacao/tipos';
 import { buscarOrdens } from '../servicos/ordensServico';
-import { cores, espacos, larguraLarga, raio } from '../tema/tema';
+import { cores, espacos, larguraLarga } from '../tema/tema';
 import type { OrdemServico } from '../types/entidades';
 
 type TelaOrdensProps = NativeStackScreenProps<RotasDaPilha, 'Ordens'>;
@@ -45,12 +46,8 @@ export function TelaOrdens({ navigation }: TelaOrdensProps) {
   return (
     <View style={estilos.tela}>
       <View style={estilos.barra}>
-        <Pressable style={[estilos.botao, estilos.secundario]} onPress={recarregar}>
-          <Text style={[estilos.textoBotao, estilos.textoSecundario]}>Recarregar</Text>
-        </Pressable>
-        <Pressable style={estilos.botao} onPress={() => navigation.navigate('NovaOrdem')}>
-          <Text style={estilos.textoBotao}>Nova OS</Text>
-        </Pressable>
+        <Botao titulo="Recarregar" variante="secundario" onPress={recarregar} />
+        <Botao titulo="Nova OS" onPress={() => navigation.navigate('NovaOrdem')} />
       </View>
       {carregando ? (
         <View style={estilos.centro}>
@@ -90,16 +87,6 @@ const estilos = StyleSheet.create({
   centro: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: espacos.sm },
   aviso: { color: cores.textoSecundario, fontSize: 16 },
   contador: { color: cores.textoSecundario, marginBottom: espacos.sm },
-  botao: {
-    flex: 1,
-    backgroundColor: cores.primaria,
-    borderRadius: raio,
-    padding: espacos.sm + espacos.xs,
-    alignItems: 'center',
-  },
-  secundario: { backgroundColor: cores.superficie, borderWidth: 1, borderColor: cores.borda },
-  textoBotao: { color: cores.textoClaro, fontWeight: 'bold' },
-  textoSecundario: { color: cores.texto },
   linhaDeColunas: { gap: espacos.sm },
   celula: { flex: 1 },
   detalhes: { color: cores.primaria, fontWeight: 'bold', marginBottom: espacos.md },
