@@ -1,6 +1,6 @@
 {
   "name": "uc8-projeto-mobile",
-  "version": "1.3.7",
+  "version": "1.3.8",
   "main": "index.ts",
   "dependencies": {
     "@react-navigation/bottom-tabs": "7",
