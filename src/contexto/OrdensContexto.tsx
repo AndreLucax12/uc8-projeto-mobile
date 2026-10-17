@@ -1,4 +1,5 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
+import { guardarLocal } from '../banco/banco';
 import { descreverErro } from '../servicos/api';
 import { carregarClientes, carregarEquipamentos } from '../servicos/clientesServico';
 import { carregarOrdens, incluirOrdem } from '../servicos/ordensServico';
@@ -37,6 +38,10 @@ export function OrdensProvedor({ children }: { children: ReactNode }) {
         if (!cancelado) {
           setEstado({ tipo: 'pronto', ordens, clientes, equipamentos });
         }
+        // Guarda no aparelho o que veio da nuvem; uma falha aqui não atrapalha a lista.
+        guardarLocal({ ordens, clientes, equipamentos }).catch((erro: unknown) => {
+          console.warn('Não foi possível guardar no aparelho: ' + descreverErro(erro));
+        });
       })
       .catch((erro: unknown) => {
         if (!cancelado) {
