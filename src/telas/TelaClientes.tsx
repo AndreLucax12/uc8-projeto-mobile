@@ -1,12 +1,15 @@
 import { useEffect, useState } from 'react';
-import { ActivityIndicator, FlatList, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, FlatList, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
 import { CartaoCliente } from '../componentes/CartaoCliente';
 import { buscarClientes } from '../servicos/clientesServico';
+import { cores, espacos, larguraLarga } from '../tema/tema';
 import type { Cliente } from '../types/entidades';
 
 export function TelaClientes() {
   const [clientes, setClientes] = useState<Cliente[]>([]);
   const [carregando, setCarregando] = useState(true);
+  const { width } = useWindowDimensions();
+  const duasColunas = width >= larguraLarga;
 
   useEffect(() => {
     let cancelado = false;
@@ -25,7 +28,7 @@ export function TelaClientes() {
   if (carregando) {
     return (
       <View style={estilos.centro}>
-        <ActivityIndicator size="large" />
+        <ActivityIndicator size="large" color={cores.primaria} />
         <Text style={estilos.aviso}>Carregando clientes...</Text>
       </View>
     );
@@ -34,17 +37,26 @@ export function TelaClientes() {
   return (
     <View style={estilos.tela}>
       <FlatList
+        key={duasColunas ? 'duas' : 'uma'}
         data={clientes}
+        numColumns={duasColunas ? 2 : 1}
+        columnWrapperStyle={duasColunas ? estilos.linhaDeColunas : undefined}
         keyExtractor={(cliente) => String(cliente.id)}
-        renderItem={({ item }) => <CartaoCliente cliente={item} />}
-        ListEmptyComponent={<Text>Nenhum cliente cadastrado ainda.</Text>}
+        renderItem={({ item }) => (
+          <View style={estilos.celula}>
+            <CartaoCliente cliente={item} />
+          </View>
+        )}
+        ListEmptyComponent={<Text style={estilos.aviso}>Nenhum cliente cadastrado ainda.</Text>}
       />
     </View>
   );
 }
 
 const estilos = StyleSheet.create({
-  tela: { flex: 1, backgroundColor: '#F6F8FA', padding: 16 },
-  centro: { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: '#F6F8FA' },
-  aviso: { color: '#5B6B7C', fontSize: 16, marginTop: 8 },
+  tela: { flex: 1, backgroundColor: cores.fundo, padding: espacos.md },
+  centro: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: espacos.sm, backgroundColor: cores.fundo },
+  aviso: { color: cores.textoSecundario, fontSize: 16 },
+  linhaDeColunas: { gap: espacos.sm },
+  celula: { flex: 1 },
 });

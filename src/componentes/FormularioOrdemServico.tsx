@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { cores, espacos, raio } from '../tema/tema';
 import type { OrdemServico } from '../types/entidades';
 
 // Os campos da OS sem o id: quem guarda a lista define o id.
@@ -31,12 +32,14 @@ export function FormularioOrdemServico({ aoAdicionar }: FormularioOrdemServicoPr
     <View style={estilos.formulario}>
       <TextInput
         style={estilos.campo}
+        placeholderTextColor={cores.textoSecundario}
         placeholder="Descrição do defeito"
         value={descricao}
         onChangeText={setDescricao}
       />
       <TextInput
         style={estilos.campo}
+        placeholderTextColor={cores.textoSecundario}
         placeholder="Nº do equipamento"
         keyboardType="numeric"
         value={equipamentoId}
@@ -44,6 +47,7 @@ export function FormularioOrdemServico({ aoAdicionar }: FormularioOrdemServicoPr
       />
       <TextInput
         style={estilos.campo}
+        placeholderTextColor={cores.textoSecundario}
         placeholder="Valor total"
         keyboardType="numeric"
         value={valor}
@@ -57,8 +61,16 @@ export function FormularioOrdemServico({ aoAdicionar }: FormularioOrdemServicoPr
 }
 
 const estilos = StyleSheet.create({
-  formulario: { marginBottom: 16 },
-  campo: { backgroundColor: '#fff', borderRadius: 6, padding: 10, marginBottom: 8 },
-  botao: { backgroundColor: '#004A8D', borderRadius: 6, padding: 12, alignItems: 'center' },
-  textoBotao: { color: '#fff', fontWeight: 'bold' },
+  formulario: { marginBottom: espacos.md },
+  campo: {
+    backgroundColor: cores.superficie,
+    borderColor: cores.borda,
+    borderWidth: 1,
+    borderRadius: raio,
+    color: cores.texto,
+    padding: espacos.sm + espacos.xs,
+    marginBottom: espacos.sm,
+  },
+  botao: { backgroundColor: cores.primaria, borderRadius: raio, padding: espacos.sm + espacos.xs, alignItems: 'center' },
+  textoBotao: { color: cores.textoClaro, fontWeight: 'bold' },
 });

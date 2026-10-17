@@ -1,16 +1,10 @@
 import { StyleSheet, Text, View } from 'react-native';
+import { cores, espacos, raio } from '../tema/tema';
 import type { Cliente } from '../types/entidades';
+import { formatarTelefone } from '../utils/formatar';
 
 interface CartaoClienteProps {
   cliente: Cliente;
-}
-
-// Mesmo formato do TechOS Desktop: (84) 99123-4567 ou (84) 3321-5566.
-function formatarTelefone(telefone: string): string {
-  const digitos = telefone.replace(/\D/g, '');
-  if (digitos.length === 11) return digitos.replace(/^(\d{2})(\d{5})(\d{4})$/, '($1) $2-$3');
-  if (digitos.length === 10) return digitos.replace(/^(\d{2})(\d{4})(\d{4})$/, '($1) $2-$3');
-  return telefone;
 }
 
 export function CartaoCliente({ cliente }: CartaoClienteProps) {
@@ -23,7 +17,14 @@ export function CartaoCliente({ cliente }: CartaoClienteProps) {
 }
 
 const estilos = StyleSheet.create({
-  cartao: { backgroundColor: '#fff', borderRadius: 8, padding: 16, marginBottom: 12 },
-  nome: { fontSize: 18, fontWeight: 'bold' },
-  telefone: { color: '#5B6B7C', marginTop: 4 },
+  cartao: {
+    backgroundColor: cores.superficie,
+    borderColor: cores.borda,
+    borderWidth: 1,
+    borderRadius: raio,
+    padding: espacos.md,
+    marginBottom: espacos.sm,
+  },
+  nome: { fontSize: 18, fontWeight: 'bold', color: cores.texto },
+  telefone: { color: cores.textoSecundario, marginTop: espacos.xs },
 });
