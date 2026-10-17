@@ -40,6 +40,12 @@ export function TelaOrdens({ navigation }: TelaOrdensProps) {
                 Sem conexão: mostrando as ordens guardadas no aparelho ({estado.motivo})
               </Text>
             )}
+            {estado.pendentes.length > 0 && (
+              <Text style={estilos.alerta}>
+                A enviar ({estado.pendentes.length}):{' '}
+                {estado.pendentes.map((pendente) => pendente.descricaoDefeito).join(', ')}
+              </Text>
+            )}
             <Text style={estilos.contador}>
               {estado.ordens.length} {estado.ordens.length === 1 ? 'ordem' : 'ordens'} de serviço
             </Text>

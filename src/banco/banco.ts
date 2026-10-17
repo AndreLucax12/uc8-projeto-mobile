@@ -3,6 +3,21 @@ import type { Cliente, Equipamento, OrdemServico, OrdemServicoDetalhada } from '
 
 // O que o aparelho guarda da última carga com rede: as ordens (já com cliente e equipamento),
 // os clientes e os equipamentos, para a lista e a Nova OS funcionarem sem rede.
+// Uma OS aberta sem rede, esperando a próxima carga com rede para ir à nuvem.
+export interface Pendente {
+  id: number;
+  equipamentoId: number;
+  descricaoDefeito: string;
+  valorTotal: number;
+}
+
+interface LinhaPendente {
+  id: number;
+  id_equipamento: number;
+  descricao_defeito: string;
+  valor_total: number;
+}
+
 export interface DadosGuardados {
   ordens: OrdemServicoDetalhada[];
   clientes: Cliente[];
@@ -63,6 +78,12 @@ function banco(): Promise<SQLite.SQLiteDatabase> {
           marca TEXT NOT NULL,
           modelo TEXT NOT NULL,
           id_cliente INTEGER NOT NULL
+        );
+        CREATE TABLE IF NOT EXISTS pendentes (
+          id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+          id_equipamento INTEGER NOT NULL,
+          descricao_defeito TEXT NOT NULL,
+          valor_total REAL NOT NULL
         );
       `);
       return db;
@@ -148,4 +169,31 @@ export async function contarLocal(): Promise<number> {
   const db = await banco();
   const linha = await db.getFirstAsync<{ total: number }>('SELECT COUNT(*) AS total FROM ordens');
   return linha?.total ?? 0;
+}
+
+export async function listarPendentes(): Promise<Pendente[]> {
+  const db = await banco();
+  const linhas = await db.getAllAsync<LinhaPendente>(
+    'SELECT id, id_equipamento, descricao_defeito, valor_total FROM pendentes ORDER BY id',
+  );
+  return linhas.map((linha) => ({
+    id: linha.id,
+    equipamentoId: linha.id_equipamento,
+    descricaoDefeito: linha.descricao_defeito,
+    valorTotal: linha.valor_total,
+  }));
+}
+
+export async function guardarPendente(dados: Omit<Pendente, 'id'>): Promise<Pendente> {
+  const db = await banco();
+  const resultado = await db.runAsync(
+    'INSERT INTO pendentes (id_equipamento, descricao_defeito, valor_total) VALUES (?, ?, ?)',
+    [dados.equipamentoId, dados.descricaoDefeito, dados.valorTotal],
+  );
+  return { id: resultado.lastInsertRowId, ...dados };
+}
+
+export async function removerPendente(id: number): Promise<void> {
+  const db = await banco();
+  await db.runAsync('DELETE FROM pendentes WHERE id = ?', [id]);
 }
