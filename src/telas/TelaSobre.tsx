@@ -2,21 +2,29 @@ import { useCallback, useState } from 'react';
 import { PixelRatio, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { contarLocal } from '../banco/banco';
+import { registrarErro } from '../erros/erros';
 import { cores, espacos } from '../tema/tema';
 
 export function TelaSobre() {
   const { width, height, fontScale } = useWindowDimensions();
-  const [guardadas, setGuardadas] = useState<number | undefined>(undefined);
+  const [guardadas, setGuardadas] = useState('...');
 
   // Conta de novo sempre que a aba ganha foco: depois de uma carga, o número muda.
   useFocusEffect(
     useCallback(() => {
       let cancelado = false;
-      contarLocal().then((total) => {
-        if (!cancelado) {
-          setGuardadas(total);
-        }
-      });
+      contarLocal()
+        .then((total) => {
+          if (!cancelado) {
+            setGuardadas(String(total));
+          }
+        })
+        .catch((erro: unknown) => {
+          registrarErro('contagem', erro);
+          if (!cancelado) {
+            setGuardadas('indisponível');
+          }
+        });
       return () => {
         cancelado = true;
       };
@@ -35,7 +43,7 @@ export function TelaSobre() {
       </Text>
       <Text style={estilos.medida}>Densidade: {PixelRatio.get()}x</Text>
       <Text style={estilos.medida}>Escala da fonte: {fontScale}</Text>
-      <Text style={estilos.medida}>Guardadas no aparelho: {guardadas === undefined ? '...' : guardadas}</Text>
+      <Text style={estilos.medida}>Guardadas no aparelho: {guardadas}</Text>
     </View>
   );
 }

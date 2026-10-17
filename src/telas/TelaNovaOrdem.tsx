@@ -4,7 +4,7 @@ import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { FormularioOrdemServico } from '../componentes/FormularioOrdemServico';
 import { useOrdens, type DadosNovaOS } from '../contexto/OrdensContexto';
 import type { RotasDaPilha } from '../navegacao/tipos';
-import { descreverErro } from '../servicos/api';
+import { registrarErro } from '../erros/erros';
 import { cores, espacos } from '../tema/tema';
 
 type TelaNovaOrdemProps = NativeStackScreenProps<RotasDaPilha, 'NovaOrdem'>;
@@ -22,7 +22,7 @@ export function TelaNovaOrdem({ navigation }: TelaNovaOrdemProps) {
         navigation.goBack();
       })
       .catch((falha: unknown) => {
-        setErro(descreverErro(falha));
+        setErro(registrarErro('cadastro', falha).mensagem);
         setEnviando(false);
       });
   }

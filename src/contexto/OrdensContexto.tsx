@@ -7,7 +7,7 @@ import {
   removerPendente,
   type Pendente,
 } from '../banco/banco';
-import { registrarErro } from '../erros/erros';
+import { ErroDeValidacao, registrarErro } from '../erros/erros';
 import { ErroDaApi } from '../servicos/api';
 import { carregarClientes, carregarEquipamentos } from '../servicos/clientesServico';
 import { carregarOrdens, incluirOrdem, type DadosNovaOrdem } from '../servicos/ordensServico';
@@ -123,6 +123,16 @@ export function OrdensProvedor({ children }: { children: ReactNode }) {
   }
 
   async function incluir(dados: DadosNovaOS): Promise<void> {
+    // A tela valida para orientar; o provedor valida de novo para garantir.
+    if (!Number.isInteger(dados.equipamentoId) || dados.equipamentoId <= 0) {
+      throw new ErroDeValidacao('Escolha o equipamento da OS.');
+    }
+    if (dados.descricaoDefeito.trim() === '') {
+      throw new ErroDeValidacao('Descreva o defeito.');
+    }
+    if (!Number.isFinite(dados.valorTotal) || dados.valorTotal < 0) {
+      throw new ErroDeValidacao('O valor precisa ser zero ou maior.');
+    }
     try {
       const nova = await incluirOrdem(paraEnvio(dados));
       setEstado((atual) => (atual.tipo === 'pronto' ? { ...atual, ordens: [nova, ...atual.ordens] } : atual));
