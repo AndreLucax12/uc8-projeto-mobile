@@ -2,7 +2,7 @@
   "expo": {
     "name": "uc8-projeto-mobile",
     "slug": "uc8-projeto-mobile",
-    "version": "1.6.17",
+    "version": "1.6.18",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
@@ -24,6 +24,11 @@
     },
     "plugins": [
       "expo-sqlite"
-    ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "245b853b-9321-47fc-b713-f699ed59e3e0"
+      }
+    }
   }
 }
