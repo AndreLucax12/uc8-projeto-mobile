@@ -2,8 +2,8 @@
   "expo": {
     "name": "uc8-projeto-mobile",
     "slug": "uc8-projeto-mobile",
-    "version": "1.6.18",
-    "orientation": "portrait",
+    "version": "1.6.19",
+    "orientation": "default",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "ios": {
